@@ -1,6 +1,7 @@
 package com.example.draganddroprecyclerview
 
 import android.graphics.Canvas
+import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
@@ -69,7 +70,7 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         super.onSelectedChanged(viewHolder, actionState)
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
             if (viewHolder is MyAdapter.MyItemViewHolder) {
-                viewHolder.onItemTochLongAndDrag()
+                viewHolder.onItemTouchLongAndDrag()
             }
         }
     }
@@ -78,10 +79,8 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         super.clearView(recyclerView, viewHolder)
         if (viewHolder is MyAdapter.MyItemViewHolder) {
             viewHolder.onItemDrop()
-            viewHolder.itemView.post {
                 val startPosition = viewHolder.adapterPosition
                 viewHolder.onItemChangeTag(startPosition)
-            }
         }
     }
 }

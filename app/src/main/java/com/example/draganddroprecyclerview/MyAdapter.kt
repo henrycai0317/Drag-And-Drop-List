@@ -1,6 +1,7 @@
 package com.example.draganddroprecyclerview
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
@@ -11,8 +12,12 @@ import java.util.*
 
 class MyAdapter(private val mData: MutableList<DataModel>) :
     RecyclerView.Adapter<MyAdapter.MyItemViewHolder>(), MyItemTouchHelperAdapter {
+    private val TAG get() = MyAdapter::class.java.simpleName
 
     private var itemTouchHelper: ItemTouchHelper? = null
+
+    private var mOriginPosition: Int = -1
+    private var mIsDrop = true
 
     fun setItemTouchHelper(itemTouchHelper: ItemTouchHelper) {
         this.itemTouchHelper = itemTouchHelper
@@ -32,6 +37,11 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        if (mIsDrop) {
+            mOriginPosition = fromPosition
+        }
+        mIsDrop = false
+        Log.d(TAG, "onItemMove: fromPosition $fromPosition , toPosition $toPosition")
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
                 Collections.swap(mData, i, i + 1)
@@ -54,8 +64,10 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
         fun bindData(pDataModel: DataModel, pPosition: Int) {
             mBinding.apply {
                 if (pDataModel.isDisable) {
+//                    tvTag.setViewGone()
                     clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_disable)
                 } else {
+//                    tvTag.setViewVisible()
                     clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
                 }
                 tvOrderId.text = pDataModel.orderId
@@ -70,7 +82,7 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
             }
         }
 
-        fun onItemTochLongAndDrag() {
+        fun onItemTouchLongAndDrag() {
             // 選擇顏色
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_selected)
         }
@@ -80,10 +92,24 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
         }
 
-        fun onItemChangeTag(startPosition: Int) {
-            notifyItemChanged(startPosition)
-            for (i in 0 until itemCount) {
-                notifyItemChanged(i, "TAG_UPDATE")
+        fun onItemChangeTag(pFromPosition: Int) {
+            mIsDrop = true
+            Log.d(
+                TAG,
+                "onItemChangeTag: mOriginPosition $mOriginPosition startPosition $pFromPosition "
+            )
+            if (mOriginPosition != -1) {
+                if (mOriginPosition < pFromPosition) {
+                    for (i in mOriginPosition..pFromPosition) {
+                        Log.d(TAG, "onItemChangeTag: Update $i")
+                        notifyItemChanged(i, "TAG_UPDATE")
+                    }
+                } else {
+                    for (i in pFromPosition .. mOriginPosition) {
+                        Log.d(TAG, "onItemChangeTag: Update $i")
+                        notifyItemChanged(i, "TAG_UPDATE")
+                    }
+                }
             }
         }
     }
