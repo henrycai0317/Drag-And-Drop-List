@@ -9,10 +9,7 @@ interface MyItemTouchHelperAdapter {
     fun isItemDisabled(position: Int): Boolean
 }
 
-class MyItemTouchHelper(
-    private val mAdapter: MyItemTouchHelperAdapter,
-    dataList: MutableList<DataModel>
-) :
+class MyItemTouchHelper(private val mAdapter: MyItemTouchHelperAdapter) :
     ItemTouchHelper.Callback() {
 
     override fun isLongPressDragEnabled(): Boolean {
@@ -20,14 +17,14 @@ class MyItemTouchHelper(
     }
 
     override fun isItemViewSwipeEnabled(): Boolean {
-        return false
+        return true
     }
 
     override fun getMovementFlags(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        // 如果項目是disable狀態，禁用拖動
+        /*** 如果項目是disable狀態，禁用拖動 ***/
         return if (mAdapter.isItemDisabled(viewHolder.adapterPosition)) {
             0
         } else {
@@ -47,7 +44,7 @@ class MyItemTouchHelper(
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        // 不處理滑動
+
     }
 
     override fun onChildDraw(
@@ -59,21 +56,12 @@ class MyItemTouchHelper(
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-
-        // 拖移時滑動到畫面頂部或底部時，RecyclerView才滑動的邏輯
-        val scrollThreshold = 30
-        val topThreshold = recyclerView.paddingTop + scrollThreshold
-        val bottomThreshold = recyclerView.height - recyclerView.paddingBottom - scrollThreshold
-
-        // 當向下拖動且到達頂部時，RecyclerView 向上滾動
-        if (dY > 0 && viewHolder.adapterPosition == 0 && viewHolder.itemView.top < topThreshold) {
-            recyclerView.scrollBy(0, dY.toInt())
-        }
-        // 當向上拖動且到達底部時，RecyclerView 向下滾動
-        else if (dY < 0 && viewHolder.adapterPosition == dataList.size - 1 && viewHolder.itemView.bottom > bottomThreshold) {
-            recyclerView.scrollBy(0, dY.toInt())
+        /*** 處理項目拖動時的透明視覺效果 ***/
+        if (isCurrentlyActive) {
+            viewHolder.itemView.alpha = 0.7f
+        } else {
+            viewHolder.itemView.alpha = 1.0f
         }
     }
 
@@ -95,7 +83,5 @@ class MyItemTouchHelper(
                 viewHolder.onItemChangeTag(startPosition)
             }
         }
-
-
     }
 }

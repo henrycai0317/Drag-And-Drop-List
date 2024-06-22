@@ -14,7 +14,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <TextView
             android:id="@+id/tvTag"
@@ -23,11 +24,11 @@
             android:layout_marginLeft="25dp"
             android:layout_marginRight="25dp"
             android:background="@drawable/bg_circle_blue"
-            android:paddingHorizontal="7dp"
-            android:paddingVertical="6dp"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="4dp"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintHorizontal_weight="0.3"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/llDataContent"
             app:layout_constraintTop_toTopOf="parent"
@@ -41,7 +42,8 @@
             android:paddingVertical="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/tvTag"
-            app:layout_constraintRight_toLeftOf="@+id/dragHandle"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintRight_toLeftOf="@+id/llDragHandle"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -76,16 +78,24 @@
                 app:layout_constraintLeft_toRightOf="@+id/llTag" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/dragHandle"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginHorizontal="15dp"
-            android:src="@drawable/menu"
+        <LinearLayout
+            android:id="@+id/llDragHandle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/llDataContent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_weight="0.3"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginHorizontal="15dp"
+                android:src="@drawable/menu" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

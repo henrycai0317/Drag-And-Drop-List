@@ -23,9 +23,10 @@ class MainActivity : AppCompatActivity() {
             recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
             recyclerView.adapter = adapter
 
-            val myItemTouchCallback = MyItemTouchHelper(adapter,dataList)
+            val myItemTouchCallback = MyItemTouchHelper(adapter)
             val touchHelper = ItemTouchHelper(myItemTouchCallback)
             touchHelper.attachToRecyclerView(recyclerView)
+            adapter.setItemTouchHelper(touchHelper)
         }
     }
 }

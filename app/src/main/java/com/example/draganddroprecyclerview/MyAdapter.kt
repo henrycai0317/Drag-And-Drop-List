@@ -2,13 +2,21 @@ package com.example.draganddroprecyclerview
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.draganddroprecyclerview.databinding.ItemViewBinding
 import java.util.*
 
 class MyAdapter(private val mData: MutableList<DataModel>) :
     RecyclerView.Adapter<MyAdapter.MyItemViewHolder>(), MyItemTouchHelperAdapter {
+
+    private var itemTouchHelper: ItemTouchHelper? = null
+
+    fun setItemTouchHelper(itemTouchHelper: ItemTouchHelper) {
+        this.itemTouchHelper = itemTouchHelper
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyItemViewHolder {
         val binding = ItemViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -42,7 +50,7 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
 
     inner class MyItemViewHolder(private val mBinding: ItemViewBinding) :
         RecyclerView.ViewHolder(mBinding.root) {
-        @SuppressLint("SetTextI18n")
+        @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
         fun bindData(pDataModel: DataModel, pPosition: Int) {
             mBinding.apply {
                 if (pDataModel.isDisable) {
@@ -53,6 +61,12 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
                 tvOrderId.text = pDataModel.orderId
                 tvAddress.text = pDataModel.address
                 tvTag.text = (pPosition + 1).toString()
+                llDragHandle.setOnTouchListener { _, event ->
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+                        itemTouchHelper?.startDrag(this@MyItemViewHolder)
+                    }
+                    true
+                }
             }
 
         }
