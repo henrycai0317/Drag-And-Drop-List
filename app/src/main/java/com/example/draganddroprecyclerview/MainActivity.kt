@@ -2,7 +2,6 @@ package com.example.draganddroprecyclerview
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.draganddroprecyclerview.databinding.ActivityMainBinding
 

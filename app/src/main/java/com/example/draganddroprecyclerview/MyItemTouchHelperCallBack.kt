@@ -1,7 +1,6 @@
 package com.example.draganddroprecyclerview
 
 import android.graphics.Canvas
-import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
@@ -80,7 +79,7 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         if (viewHolder is MyAdapter.MyItemViewHolder) {
             viewHolder.onItemDrop()
                 val startPosition = viewHolder.adapterPosition
-                viewHolder.onItemChangeTag(startPosition)
+                viewHolder.onItemChangeUpdateUI(startPosition)
         }
     }
 }

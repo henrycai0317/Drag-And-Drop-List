@@ -8,6 +8,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.draganddroprecyclerview.databinding.ItemViewBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class MyAdapter(private val mData: MutableList<DataModel>) :
@@ -60,19 +66,38 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
 
     inner class MyItemViewHolder(private val mBinding: ItemViewBinding) :
         RecyclerView.ViewHolder(mBinding.root) {
-        @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
+
+        private val viewHolderScope = CoroutineScope(Dispatchers.Main + Job())
+
         fun bindData(pDataModel: DataModel, pPosition: Int) {
+            viewHolderScope.coroutineContext.cancelChildren() // 取消之前的協程
+            viewHolderScope.launch {
+                val tagNum = withContext(Dispatchers.Default) {
+                    countEnabledItems(pPosition)
+                }
+                Log.d(TAG, "bindData: tagNum = $tagNum")
+                updateUI(pDataModel, tagNum)
+            }
+        }
+
+        @SuppressLint("ClickableViewAccessibility")
+        private fun updateUI(pDataModel: DataModel, tagNum: Int) {
             mBinding.apply {
                 if (pDataModel.isDisable) {
-//                    tvTag.setViewGone()
+                    tvTag.setViewInVisible()
                     clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_disable)
                 } else {
-//                    tvTag.setViewVisible()
+                    tvTag.setViewVisible()
                     clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
+
+                    tvTag.text = (tagNum).toString()
                 }
                 tvOrderId.text = pDataModel.orderId
                 tvAddress.text = pDataModel.address
-                tvTag.text = (pPosition + 1).toString()
+                Log.d(
+                    TAG,
+                    "updateUI: tvTag = ${tvTag.text}, tvOrderId = ${tvOrderId.text}, tvAddress = ${tvAddress.text}"
+                )
                 llDragHandle.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         itemTouchHelper?.startDrag(this@MyItemViewHolder)
@@ -80,6 +105,17 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
                     true
                 }
             }
+        }
+
+        private fun countEnabledItems(pPosition: Int): Int {
+            var tagNum = 0
+            for (index in 0..pPosition) {
+                Log.d(TAG, "countEnabledItems: index: $index")
+                if (!mData[index].isDisable) {
+                    tagNum++
+                }
+            }
+            return tagNum
         }
 
         fun onItemTouchLongAndDrag() {
@@ -92,7 +128,7 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
         }
 
-        fun onItemChangeTag(pFromPosition: Int) {
+        fun onItemChangeUpdateUI(pFromPosition: Int) {
             mIsDrop = true
             Log.d(
                 TAG,
@@ -105,7 +141,7 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
                         notifyItemChanged(i, "TAG_UPDATE")
                     }
                 } else {
-                    for (i in pFromPosition .. mOriginPosition) {
+                    for (i in pFromPosition..mOriginPosition) {
                         Log.d(TAG, "onItemChangeTag: Update $i")
                         notifyItemChanged(i, "TAG_UPDATE")
                     }

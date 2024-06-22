@@ -13,3 +13,9 @@ fun View?.setViewVisible() {
         this.visibility = View.VISIBLE
     }
 }
+
+fun View?.setViewInVisible() {
+    if (this != null) {
+        this.visibility = View.INVISIBLE
+    }
+}
