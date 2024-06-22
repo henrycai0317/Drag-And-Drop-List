@@ -6,8 +6,11 @@
     <color name="cl02000000">#02000000</color>
     <color name="cl03000000">#03000000</color>
     <color name="cl04000000">#04000000</color>
-    <color name="cl04000000">#04000000</color>
     <color name="cl80000000">#80000000</color>
-    <color name="clf6f6f6">#f6f6f6</color>
     <color name="cl0d47a1">#0D47A1</color>
+
+    <color name="clf6f6f6">#F6F6F6</color>  <!-- 選擇時的背景顏色 -->
+    <color name="clffffff">#FFFFFF</color> <!-- 啟用項目的背景顏色 -->
+    <color name="clffa500">#FFA500</color> <!-- 禁用項目的背景顏色 -->
+    <color name="cl808080">#808080</color>
 </resources>
