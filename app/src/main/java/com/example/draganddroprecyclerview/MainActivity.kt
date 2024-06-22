@@ -8,7 +8,7 @@ import com.example.draganddroprecyclerview.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private var mBinding:ActivityMainBinding? = null
+    private var mBinding: ActivityMainBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -22,11 +22,12 @@ class MainActivity : AppCompatActivity() {
             val adapter = MyAdapter(dataList)
             recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
             recyclerView.adapter = adapter
-
-            val myItemTouchCallback = MyItemTouchHelper(adapter)
-            val touchHelper = ItemTouchHelper(myItemTouchCallback)
-            touchHelper.attachToRecyclerView(recyclerView)
-            adapter.setItemTouchHelper(touchHelper)
+            adapter.setItemTouchHelper(
+                ItemTouchHelperExtension.attachToRecyclerView(
+                    recyclerView,
+                    adapter
+                )
+            )
         }
     }
 }

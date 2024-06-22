@@ -9,7 +9,7 @@ interface MyItemTouchHelperAdapter {
     fun isItemDisabled(position: Int): Boolean
 }
 
-class MyItemTouchHelper(private val mAdapter: MyItemTouchHelperAdapter) :
+class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) :
     ItemTouchHelper.Callback() {
 
     override fun isLongPressDragEnabled(): Boolean {

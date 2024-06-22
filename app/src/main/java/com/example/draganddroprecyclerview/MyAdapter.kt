@@ -68,7 +68,6 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
                     true
                 }
             }
-
         }
 
         fun onItemTochLongAndDrag() {
@@ -79,7 +78,6 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
         fun onItemDrop() {
             // 恢復原顏色
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
-
         }
 
         fun onItemChangeTag(startPosition: Int) {
@@ -89,6 +87,5 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
             }
         }
     }
-
 
 }
