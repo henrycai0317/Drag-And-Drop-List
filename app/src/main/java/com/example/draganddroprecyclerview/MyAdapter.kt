@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
-class MyAdapter(private val mData: MutableList<DataModel>) :
+class MyAdapter(private val mDataList: MutableList<DataModel>) :
     RecyclerView.Adapter<MyAdapter.MyItemViewHolder>(), MyItemTouchHelperAdapter {
     private val TAG get() = MyAdapter::class.java.simpleName
 
@@ -29,17 +29,22 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
         this.itemTouchHelper = itemTouchHelper
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun upDateData() {
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyItemViewHolder {
         val binding = ItemViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MyItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MyItemViewHolder, position: Int) {
-        holder.bindData(mData[position], position)
+        holder.bindData(mDataList[position], position)
     }
 
     override fun getItemCount(): Int {
-        return mData.size
+        return mDataList.size
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
@@ -50,18 +55,18 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
         Log.d(TAG, "onItemMove: fromPosition $fromPosition , toPosition $toPosition")
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
-                Collections.swap(mData, i, i + 1)
+                Collections.swap(mDataList, i, i + 1)
             }
         } else {
             for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(mData, i, i - 1)
+                Collections.swap(mDataList, i, i - 1)
             }
         }
         notifyItemMoved(fromPosition, toPosition)   // 更新項目的移動位置
     }
 
     override fun isItemDisabled(position: Int): Boolean {
-        return mData[position].isDisable
+        return mDataList[position].isDisable
     }
 
     inner class MyItemViewHolder(private val mBinding: ItemViewBinding) :
@@ -111,7 +116,7 @@ class MyAdapter(private val mData: MutableList<DataModel>) :
             var tagNum = 0
             for (index in 0..pPosition) {
                 Log.d(TAG, "countEnabledItems: index: $index")
-                if (!mData[index].isDisable) {
+                if (!mDataList[index].isDisable) {
                     tagNum++
                 }
             }
