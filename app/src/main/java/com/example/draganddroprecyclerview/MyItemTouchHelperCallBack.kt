@@ -47,6 +47,7 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
 
     }
 
+    /*** 處理項目拖動時的透明視覺效果 ***/
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,
@@ -56,13 +57,13 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        /*** 處理項目拖動時的透明視覺效果 ***/
+
         if (isCurrentlyActive) {
             viewHolder.itemView.alpha = 0.7f
         } else {
             viewHolder.itemView.alpha = 1.0f
         }
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -78,8 +79,8 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         super.clearView(recyclerView, viewHolder)
         if (viewHolder is MyAdapter.MyItemViewHolder) {
             viewHolder.onItemDrop()
-                val startPosition = viewHolder.adapterPosition
-                viewHolder.onItemChangeUpdateUI(startPosition)
+            val startPosition = viewHolder.adapterPosition
+            viewHolder.onItemChangeUpdateUI(startPosition)
         }
     }
 }

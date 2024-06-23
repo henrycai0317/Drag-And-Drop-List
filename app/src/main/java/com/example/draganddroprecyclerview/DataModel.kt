@@ -1,6 +1,11 @@
 package com.example.draganddroprecyclerview
 
-data class DataModel(val orderId: String, val address: String,var isDisable:Boolean)
+data class DataModel(
+    val orderId: String,
+    val address: String,
+    var isDisable: Boolean,
+    var translationX: Float = 0f  // 新增滑動狀態
+)
 
 fun generateRandomOrderId(): String {
     val randomNumber = (1000000..9999999).random()
