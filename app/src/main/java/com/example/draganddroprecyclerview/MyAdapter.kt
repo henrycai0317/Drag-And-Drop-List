@@ -167,22 +167,30 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
         }
 
-        fun onItemChangeUpdateUI(pFromPosition: Int) {
+        suspend fun onItemChangeUpdateUI(pFromPosition: Int) {
             mIsDrop = true
             Log.d(
                 TAG,
                 "onItemChangeTag: mOriginPosition $mOriginPosition startPosition $pFromPosition "
             )
             if (mOriginPosition != -1) {
-                if (mOriginPosition < pFromPosition) {
-                    for (i in mOriginPosition..pFromPosition) {
-                        Log.d(TAG, "onItemChangeTag: Update $i")
-                        notifyItemChanged(i, "TAG_UPDATE")
+                withContext(Dispatchers.Default) {
+                    val range = if (mOriginPosition < pFromPosition) {
+                        mOriginPosition..pFromPosition
+                    } else {
+                        pFromPosition..mOriginPosition
                     }
-                } else {
-                    for (i in pFromPosition..mOriginPosition) {
-                        Log.d(TAG, "onItemChangeTag: Update $i")
-                        notifyItemChanged(i, "TAG_UPDATE")
+
+                    val itemsToUpdate = mutableListOf<Int>()
+                    for (i in range) {
+                        Log.d(TAG, "onItemChangeTag: Add $i to update list")
+                        itemsToUpdate.add(i)
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        itemsToUpdate.forEach {
+                            notifyItemChanged(it, "TAG_UPDATE")
+                        }
                     }
                 }
             }

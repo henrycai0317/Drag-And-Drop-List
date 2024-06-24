@@ -1,16 +1,24 @@
 package com.example.draganddroprecyclerview
 
 import android.graphics.Canvas
+import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 interface MyItemTouchHelperAdapter {
     fun onItemMove(fromPosition: Int, toPosition: Int)
     fun isItemDisabled(position: Int): Boolean
+
+    fun getItemCount(): Int
 }
 
 class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) :
     ItemTouchHelper.Callback() {
+
+    private var mIsTouchDisableItemView = false //是否碰到Disable Flag
 
     override fun isLongPressDragEnabled(): Boolean {
         return true
@@ -39,9 +47,25 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        mAdapter.onItemMove(viewHolder.adapterPosition, target.adapterPosition)
-        return true
+        if (mAdapter.isItemDisabled(target.adapterPosition)) {
+            mIsTouchDisableItemView = true
+            Log.d(
+                "MyItemTouchHelperCallBack",
+                "onMove: target position ${target.adapterPosition} disable 旗標狀態 $mIsTouchDisableItemView"
+            )
+        } else {
+            Log.d(
+                "MyItemTouchHelperCallBack",
+                "onMove: target position ${target.adapterPosition} move 旗標狀態 $mIsTouchDisableItemView"
+            )
+        }
+
+        if (!mIsTouchDisableItemView) {
+            mAdapter.onItemMove(viewHolder.adapterPosition, target.adapterPosition)
+        }
+        return !mIsTouchDisableItemView
     }
+
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 
@@ -77,10 +101,18 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
+        Log.d(
+            "MyItemTouchHelperCallBack",
+            "clearView: 拖移結束 mIsTouchDisableItemView 旗標清除狀態"
+        )
+        mIsTouchDisableItemView = false
+        viewHolder.itemView.alpha = 1.0f // 確保透明度恢復
         if (viewHolder is MyAdapter.MyItemViewHolder) {
             viewHolder.onItemDrop()
             val startPosition = viewHolder.adapterPosition
-            viewHolder.onItemChangeUpdateUI(startPosition)
+            CoroutineScope(Dispatchers.Main).launch {
+                viewHolder.onItemChangeUpdateUI(startPosition)
+            }
         }
     }
 }
