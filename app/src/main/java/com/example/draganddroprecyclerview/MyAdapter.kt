@@ -27,6 +27,7 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
 
     private var mOriginPosition: Int = -1
     private var mIsDrop = true
+    private var mLastSwipedPosition = RecyclerView.NO_POSITION  //紀錄上次滑動的位置是誰
 
     fun setItemTouchHelper(itemTouchHelper: ItemTouchHelper) {
         this.itemTouchHelper = itemTouchHelper
@@ -217,6 +218,8 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
 
                     // 計算 translationX 值
                     val newTranslationX = if (deltaX < 0) {
+                        /** 重置之前滑動的ItemView */
+                        resetSwipedItem(currentPosition)
                         /** 向左滑動，最大不能超過 llDelayed 的寬度 */
                         -maxScroll
                     } else {
@@ -226,10 +229,7 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
                     Log.d("SwipeAction", "newTranslationX: $newTranslationX")
 
 
-                    mBinding.clMainContent.animate()
-                        .translationX(newTranslationX)
-                        .setDuration(300)
-                        .start()
+                    animateTranslationXProcess(newTranslationX)
 
                     /** 更新Data滑動狀態 */
                     mDataList[currentPosition].translationX = newTranslationX
@@ -241,17 +241,35 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
 
             /** 輕點擊回彈到原始位置*/
             override fun onSingleTapUp(e: MotionEvent): Boolean {
-                mBinding.clMainContent.animate()
-                    .translationX(0f)
-                    .setDuration(300)
-                    .start()
+                animateTranslationXProcess(0f)
                 return super.onSingleTapUp(e)
             }
+        }
+
+        /** 滑動與動畫處理*/
+        private fun animateTranslationXProcess(pNewTranslationX: Float) {
+            mBinding.clMainContent.animate()
+                .translationX(pNewTranslationX)
+                .setDuration(300)
+                .start()
         }
 
         override fun onTouch(p0: View?, event: MotionEvent?): Boolean {
             return event?.let { gestureDetector?.onTouchEvent(it) } ?: true
         }
+
+        /**更新上一個已滑動的ItemView*/
+        private fun resetSwipedItem(pCurrentPosition: Int) {
+            if (mLastSwipedPosition != pCurrentPosition) {
+                if (mLastSwipedPosition != RecyclerView.NO_POSITION) {
+                    dataList[mLastSwipedPosition].translationX = 0f
+                    notifyItemChanged(mLastSwipedPosition)
+                }
+                mLastSwipedPosition = pCurrentPosition
+            }
+        }
+
+
     }
 
 }
