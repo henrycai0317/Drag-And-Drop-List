@@ -78,7 +78,6 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
 
         private val viewHolderScope = CoroutineScope(Dispatchers.Main + Job())
         private var gestureDetector: GestureDetector? = null
-        private var originalX = 0f
 
         init {
             gestureDetector = GestureDetector(mBinding.root.context, MyGestureListener())
@@ -106,7 +105,7 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
                 Log.d(TAG, "bindData: tagNum = $tagNum")
                 updateUI(pDataModel, tagNum)
             }
-            // 根據滑動狀態設置 初始化 translationX
+            /**  根據滑動狀態設置 初始化 translationX  */
             mBinding.clMainContent.translationX = pDataModel.translationX
         }
 
@@ -148,13 +147,13 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
             return tagNum
         }
 
+        /** 長按顏色 */
         fun onItemTouchLongAndDrag() {
-            // 選擇顏色
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_selected)
         }
 
+        /** 放入後變回原始顏色 */
         fun onItemDrop() {
-            // 恢復原顏色
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
         }
 
@@ -180,11 +179,13 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
         }
 
         inner class MyGestureListener : GestureDetector.SimpleOnGestureListener() {
+            /** 必須複寫onDown 通知GestureDetector使用者手指已碰到螢幕，準備開始做後面的邏輯處理
+             * 不然會罷工不做後續處理 */
             override fun onDown(e: MotionEvent): Boolean {
-                originalX = e.x
                 return true
             }
 
+            /** 滑動效果 */
             override fun onScroll(
                 e1: MotionEvent?,
                 e2: MotionEvent,
@@ -192,42 +193,50 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
                 distanceY: Float
             ): Boolean {
                 val currentPosition = adapterPosition
+                /** 如果當前項目為禁用狀態 or Adapter 沒有這個位置，讓它回去 */
                 if (currentPosition == RecyclerView.NO_POSITION || mDataList[currentPosition].isDisable) {
-                    // 如果當前項目為禁用狀態，則禁止滑動
                     return false
                 }
 
                 val deltaX = e2.x - (e1?.x ?: 0f)
                 val deltaY = e2.y - (e1?.y ?: 0f)
 
-                // Check if the horizontal scroll distance is greater than the vertical scroll distance
                 if (abs(deltaX) > abs(deltaY)) {
-                    // 獲取當前 translationX 值
-                    val currentTranslationX = mBinding.clMainContent.translationX
                     // 最大往左滑動值
                     val maxScroll = mBinding.llDelayed.width.toFloat()
                     Log.d("MyGestureListener", " onScroll deltaX:$deltaX maxScroll: $maxScroll")
 
                     // 計算 translationX 值
                     val newTranslationX = if (deltaX < 0) {
-                        // 向左滑動，最大不能超過 llDelayed 的寬度
-                        (currentTranslationX + deltaX).coerceIn(-maxScroll, 0f)
+                        /** 向左滑動，最大不能超過 llDelayed 的寬度 */
+                        -maxScroll
                     } else {
-                        // 向右滑動，回到0的位置，且不超過0
-                        (currentTranslationX + deltaX).coerceIn(-maxScroll, 0f)
+                        /**向右滑動，回到0的位置，且不超過0 */
+                        0f
                     }
                     Log.d("SwipeAction", "newTranslationX: $newTranslationX")
-                    mBinding.clMainContent.translationX = newTranslationX
 
-                    // 更新數據模型中的滑動狀態
-                    val currentPosition = adapterPosition
-                    if (currentPosition != RecyclerView.NO_POSITION) {
-                        mDataList[currentPosition].translationX = newTranslationX
-                    }
+
+                    mBinding.clMainContent.animate()
+                        .translationX(newTranslationX)
+                        .setDuration(300)
+                        .start()
+
+                    /** 更新Data滑動狀態 */
+                    mDataList[currentPosition].translationX = newTranslationX
 
                     return true
                 }
                 return super.onScroll(e1, e2, distanceX, distanceY)
+            }
+
+            /** 輕點擊回彈到原始位置*/
+            override fun onSingleTapUp(e: MotionEvent): Boolean {
+                mBinding.clMainContent.animate()
+                    .translationX(0f)
+                    .setDuration(300)
+                    .start()
+                return super.onSingleTapUp(e)
             }
         }
 
