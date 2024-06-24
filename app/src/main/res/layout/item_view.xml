@@ -40,22 +40,45 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-        <TextView
-            android:id="@+id/tvTag"
+        <LinearLayout
+            android:id="@+id/llTag"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp"
-            android:background="@drawable/bg_circle_blue"
-            android:paddingHorizontal="5dp"
-            android:paddingVertical="4dp"
-            android:textColor="@color/white"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_weight="0.3"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/llDataContent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="1" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tvTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:background="@drawable/bg_circle_blue"
+                android:paddingHorizontal="5dp"
+                android:paddingVertical="4dp"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                tools:text="1"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/ivDelayed"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/clock"
+                android:visibility="gone"
+                tools:visibility="gone" />
+
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/llDataContent"
@@ -65,7 +88,7 @@
             android:paddingVertical="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintLeft_toRightOf="@+id/tvTag"
+            app:layout_constraintLeft_toRightOf="@+id/llTag"
             app:layout_constraintRight_toLeftOf="@+id/llDragHandle"
             app:layout_constraintTop_toTopOf="parent">
 

@@ -112,15 +112,7 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
         @SuppressLint("ClickableViewAccessibility")
         private fun updateUI(pDataModel: DataModel, tagNum: Int) {
             mBinding.apply {
-                if (pDataModel.isDisable) {
-                    tvTag.setViewInVisible()
-                    clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_disable)
-                } else {
-                    tvTag.setViewVisible()
-                    clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
-
-                    tvTag.text = (tagNum).toString()
-                }
+                updateUIDelayedState(pDataModel, tagNum)
                 tvOrderId.text = pDataModel.orderId
                 tvAddress.text = pDataModel.address
                 Log.d(
@@ -133,6 +125,23 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
                     }
                     true
                 }
+            }
+        }
+
+        /** 更新Disable UI */
+        private fun ItemViewBinding.updateUIDelayedState(
+            pDataModel: DataModel,
+            tagNum: Int
+        ) {
+            if (pDataModel.isDisable) {
+                tvTag.setViewGone()
+                ivDelayed.setViewVisible()
+                clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_disable)
+            } else {
+                ivDelayed.setViewGone()
+                tvTag.setViewVisible()
+                clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
+                tvTag.text = (tagNum).toString()
             }
         }
 
