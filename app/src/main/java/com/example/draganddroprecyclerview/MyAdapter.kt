@@ -34,22 +34,20 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun upDateDataAscending() {
+    fun upDateDataSort(mCurrentSortType: SortOrder) {
         val iDisableList = mDataList.filter { it.isDisable }
-        mDataList.removeAll(iDisableList)
+        val iNormalSortedList = sortList(mDataList.filter { !it.isDisable },mCurrentSortType)
+        mDataList.clear()
+        mDataList.addAll(iNormalSortedList)
         mDataList.addAll(iDisableList)
         notifyDataSetChanged()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun updateDataDescending() {
-        val iDisableList = mDataList.filter { it.isDisable }
-        val iNormalList = mDataList.filter { !it.isDisable }
-
-        mDataList.clear()
-        mDataList.addAll( iNormalList.reversed())
-        mDataList.addAll(iDisableList)
-        notifyDataSetChanged()
+    private fun sortList(sortList: List<DataModel> ,order: SortOrder):List<DataModel> {
+      return when (order) {
+            SortOrder.ASCENDING -> sortList.sortedBy { it.orderId }
+            SortOrder.DESCENDING -> sortList.sortedByDescending { it.orderId }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyItemViewHolder {

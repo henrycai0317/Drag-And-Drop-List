@@ -34,12 +34,12 @@ class MainActivity : AppCompatActivity() {
 
             /** 由小到大排序*/
             btSortAscending.setOnClickListener {
-                mAdapter.upDateDataAscending()
+                mAdapter.upDateDataSort(SortOrder.ASCENDING)
             }
 
             /** 由大到小排序*/
             btSortDescending.setOnClickListener {
-                mAdapter.updateDataDescending()
+                mAdapter.upDateDataSort(SortOrder.DESCENDING)
             }
         }
     }
