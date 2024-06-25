@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.draganddroprecyclerview.databinding.ItemViewBinding
@@ -33,18 +34,25 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
         this.itemTouchHelper = itemTouchHelper
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun upDateDataSort(mCurrentSortType: SortOrder) {
+        val iNewDataList = mutableListOf<DataModel>()
         val iDisableList = mDataList.filter { it.isDisable }
-        val iNormalSortedList = sortList(mDataList.filter { !it.isDisable },mCurrentSortType)
-        mDataList.clear()
-        mDataList.addAll(iNormalSortedList)
-        mDataList.addAll(iDisableList)
-        notifyDataSetChanged()
+        val iNormalSortedList = sortList(mDataList.filter { !it.isDisable }, mCurrentSortType)
+        iNewDataList.addAll(iNormalSortedList)
+        iNewDataList.addAll(iDisableList)
+        notifyAdapterDataChange(iNewDataList)
     }
 
-    private fun sortList(sortList: List<DataModel> ,order: SortOrder):List<DataModel> {
-      return when (order) {
+    /** DiffUtil 更新List Data*/
+    private fun notifyAdapterDataChange(pNewDataList: List<DataModel>) {
+        val diffResult = DiffUtil.calculateDiff(DataModelDiffCallback(mDataList, pNewDataList))
+        mDataList.clear()
+        mDataList.addAll(pNewDataList)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    private fun sortList(sortList: List<DataModel>, order: SortOrder): List<DataModel> {
+        return when (order) {
             SortOrder.ASCENDING -> sortList.sortedBy { it.orderId }
             SortOrder.DESCENDING -> sortList.sortedByDescending { it.orderId }
         }
@@ -99,11 +107,14 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
             mBinding.llDelayed.setOnClickListener {
                 val currentPosition = adapterPosition
                 if (currentPosition != RecyclerView.NO_POSITION && currentPosition != itemCount - 1) {
-                    val item = mDataList.removeAt(currentPosition)
+                    val newList = mDataList.toMutableList()
+                    val item = newList.removeAt(currentPosition)
                     item.isDisable = true
                     item.translationX = 0f
-                    mDataList.add(item)
-                    notifyDataSetChanged()
+                    newList.add(item)
+                    notifyAdapterDataChange(newList)
+                    notifyItemChanged(currentPosition)  // 通知項目已更改以重新綁定視圖
+                    notifyItemChanged(itemCount - 1)    // 通知最後一個項目以更新其狀態
                 }
             }
         }
@@ -294,8 +305,5 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
                 mLastSwipedPosition = pCurrentPosition
             }
         }
-
-
     }
-
 }
