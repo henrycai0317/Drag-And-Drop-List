@@ -47,23 +47,8 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        if (mAdapter.isItemDisabled(target.adapterPosition)) {
-            mIsTouchDisableItemView = true
-            Log.d(
-                "MyItemTouchHelperCallBack",
-                "onMove: target position ${target.adapterPosition} disable 旗標狀態 $mIsTouchDisableItemView"
-            )
-        } else {
-            Log.d(
-                "MyItemTouchHelperCallBack",
-                "onMove: target position ${target.adapterPosition} move 旗標狀態 $mIsTouchDisableItemView"
-            )
-        }
-
-        if (!mIsTouchDisableItemView) {
-            mAdapter.onItemMove(viewHolder.adapterPosition, target.adapterPosition)
-        }
-        return !mIsTouchDisableItemView
+        mAdapter.onItemMove(viewHolder.adapterPosition, target.adapterPosition)
+        return true
     }
 
 
