@@ -9,7 +9,7 @@ import com.example.draganddroprecyclerview.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private var mBinding: ActivityMainBinding? = null
-    private val mAdapter: MyAdapter by lazy { MyAdapter(dataList) }
+    private val mAdapter: MyAdapter by lazy { MyAdapter(dataList,mBinding?.recyclerView) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

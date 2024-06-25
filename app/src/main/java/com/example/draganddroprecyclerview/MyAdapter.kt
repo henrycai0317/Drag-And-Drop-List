@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.draganddroprecyclerview.databinding.ItemViewBinding
 import kotlinx.coroutines.CoroutineScope
@@ -20,8 +21,14 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.math.abs
 
-class MyAdapter(private val mDataList: MutableList<DataModel>) :
+class MyAdapter(
+    private val mDataList: MutableList<DataModel>,
+    private val mRecyclerView: RecyclerView?
+) :
     RecyclerView.Adapter<MyAdapter.MyItemViewHolder>(), MyItemTouchHelperAdapter {
+    private val mLayoutManager: LinearLayoutManager =
+        mRecyclerView?.layoutManager as LinearLayoutManager
+
     private val TAG get() = MyAdapter::class.java.simpleName
 
     private var itemTouchHelper: ItemTouchHelper? = null
@@ -45,10 +52,15 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
 
     /** DiffUtil 更新List Data*/
     private fun notifyAdapterDataChange(pNewDataList: List<DataModel>) {
+        val firstVisibleItemPosition = mLayoutManager.findFirstVisibleItemPosition()
         val diffResult = DiffUtil.calculateDiff(DataModelDiffCallback(mDataList, pNewDataList))
         mDataList.clear()
         mDataList.addAll(pNewDataList)
         diffResult.dispatchUpdatesTo(this)
+
+        /** 確保RecyclerView顯示位置是排序前的顯示位置*/
+        mRecyclerView?.scrollToPosition(firstVisibleItemPosition)
+        mLayoutManager.scrollToPositionWithOffset(firstVisibleItemPosition, 0)
     }
 
     private fun sortList(sortList: List<DataModel>, order: SortOrder): List<DataModel> {
