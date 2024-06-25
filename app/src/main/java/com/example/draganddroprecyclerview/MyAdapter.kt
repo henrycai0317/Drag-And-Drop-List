@@ -34,7 +34,21 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun upDateData() {
+    fun upDateDataAscending() {
+        val iDisableList = mDataList.filter { it.isDisable }
+        mDataList.removeAll(iDisableList)
+        mDataList.addAll(iDisableList)
+        notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateDataDescending() {
+        val iDisableList = mDataList.filter { it.isDisable }
+        val iNormalList = mDataList.filter { !it.isDisable }
+
+        mDataList.clear()
+        mDataList.addAll( iNormalList.reversed())
+        mDataList.addAll(iDisableList)
         notifyDataSetChanged()
     }
 

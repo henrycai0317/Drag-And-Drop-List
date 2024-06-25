@@ -32,11 +32,14 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-            btSort.setOnClickListener {
-                val iDisableList = dataList.filter { it.isDisable }
-                dataList.removeAll(iDisableList)
-                dataList.addAll(iDisableList)
-                mAdapter.upDateData()
+            /** 由小到大排序*/
+            btSortAscending.setOnClickListener {
+                mAdapter.upDateDataAscending()
+            }
+
+            /** 由大到小排序*/
+            btSortDescending.setOnClickListener {
+                mAdapter.updateDataDescending()
             }
         }
     }
