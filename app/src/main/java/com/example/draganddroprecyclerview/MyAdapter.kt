@@ -249,6 +249,12 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
 
             /** 輕點擊回彈到原始位置*/
             override fun onSingleTapUp(e: MotionEvent): Boolean {
+                val currentPosition = adapterPosition
+                /** 如果當前項目為禁用狀態 or Adapter 沒有這個位置，讓它回去 */
+                if (currentPosition == RecyclerView.NO_POSITION || mDataList[currentPosition].isDisable) {
+                    return false
+                }
+                dataList[mLastSwipedPosition].translationX = 0f
                 animateTranslationXProcess(0f)
                 return super.onSingleTapUp(e)
             }
