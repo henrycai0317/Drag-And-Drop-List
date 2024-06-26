@@ -76,7 +76,7 @@ class MyAdapter(
     }
 
     override fun onBindViewHolder(holder: MyItemViewHolder, position: Int) {
-        holder.bindData(mDataList[position], position)
+        holder.bindData(mDataList[position])
     }
 
     override fun getItemCount(): Int {
@@ -109,7 +109,6 @@ class MyAdapter(
     inner class MyItemViewHolder(private val mBinding: ItemViewBinding) :
         RecyclerView.ViewHolder(mBinding.root), View.OnTouchListener {
 
-        private val viewHolderScope = CoroutineScope(Dispatchers.Main + Job())
         private var gestureDetector: GestureDetector? = null
 
         init {
@@ -132,28 +131,21 @@ class MyAdapter(
         }
 
 
-        fun bindData(pDataModel: DataModel, pPosition: Int) {
-            viewHolderScope.coroutineContext.cancelChildren() // 取消之前的協程
-            viewHolderScope.launch {
-                val tagNum = withContext(Dispatchers.Default) {
-                    countEnabledItems(pPosition)
-                }
-                Log.d(TAG, "bindData: tagNum = $tagNum")
-                updateUI(pDataModel, tagNum)
-            }
+        fun bindData(pDataModel: DataModel) {
+            updateUI(pDataModel)
             /**  根據滑動狀態設置 初始化 translationX  */
             mBinding.clMainContent.translationX = pDataModel.translationX
         }
 
         @SuppressLint("ClickableViewAccessibility")
-        private fun updateUI(pDataModel: DataModel, tagNum: Int) {
+        private fun updateUI(pDataModel: DataModel) {
             mBinding.apply {
-                updateUIDelayedState(pDataModel, tagNum)
+                updateUIDelayedState(pDataModel)
                 tvOrderId.text = pDataModel.orderId
                 tvAddress.text = pDataModel.address
                 Log.d(
                     TAG,
-                    "updateUI: tvTag = ${tvTag.text}, tvOrderId = ${tvOrderId.text}, tvAddress = ${tvAddress.text}"
+                    "updateUI: tvOrderId = ${tvOrderId.text}, tvAddress = ${tvAddress.text}"
                 )
                 llDragHandle.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
@@ -165,31 +157,16 @@ class MyAdapter(
         }
 
         /** 更新Disable UI */
-        private fun ItemViewBinding.updateUIDelayedState(
-            pDataModel: DataModel,
-            tagNum: Int
-        ) {
+        private fun ItemViewBinding.updateUIDelayedState(pDataModel: DataModel) {
             if (pDataModel.isDisable) {
-                tvTag.setViewGone()
+                tvStartDelivery.setViewGone()
                 ivDelayed.setViewVisible()
                 clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_disable)
             } else {
                 ivDelayed.setViewGone()
-                tvTag.setViewVisible()
+                tvStartDelivery.setViewVisible()
                 clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
-                tvTag.text = (tagNum).toString()
             }
-        }
-
-        private fun countEnabledItems(pPosition: Int): Int {
-            var tagNum = 0
-            for (index in 0..pPosition) {
-                Log.d(TAG, "countEnabledItems: index: $index")
-                if (!mDataList[index].isDisable) {
-                    tagNum++
-                }
-            }
-            return tagNum
         }
 
         /** 長按顏色 */
@@ -200,35 +177,6 @@ class MyAdapter(
         /** 放入後變回原始顏色 */
         fun onItemDrop() {
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
-        }
-
-        suspend fun onItemChangeUpdateUI(pFromPosition: Int) {
-            mIsDrop = true
-            Log.d(
-                TAG,
-                "onItemChangeTag: mOriginPosition $mOriginPosition startPosition $pFromPosition "
-            )
-            if (mOriginPosition != -1) {
-                withContext(Dispatchers.Default) {
-                    val range = if (mOriginPosition < pFromPosition) {
-                        mOriginPosition..pFromPosition
-                    } else {
-                        pFromPosition..mOriginPosition
-                    }
-
-                    val itemsToUpdate = mutableListOf<Int>()
-                    for (i in range) {
-                        Log.d(TAG, "onItemChangeTag: Add $i to update list")
-                        itemsToUpdate.add(i)
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        itemsToUpdate.forEach {
-                            notifyItemChanged(it, "TAG_UPDATE")
-                        }
-                    }
-                }
-            }
         }
 
         inner class MyGestureListener : GestureDetector.SimpleOnGestureListener() {
