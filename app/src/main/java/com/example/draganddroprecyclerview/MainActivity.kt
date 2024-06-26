@@ -9,7 +9,7 @@ import com.example.draganddroprecyclerview.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private var mBinding: ActivityMainBinding? = null
-    private val mAdapter: MyAdapter by lazy { MyAdapter(dataList) }
+    private val mAdapter: MyAdapter by lazy { MyAdapter(dataList,mBinding?.recyclerView) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,11 +32,14 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-            btSort.setOnClickListener {
-                val iDisableList = dataList.filter { it.isDisable }
-                dataList.removeAll(iDisableList)
-                dataList.addAll(iDisableList)
-                mAdapter.upDateData()
+            /** 由小到大排序*/
+            btSortAscending.setOnClickListener {
+                mAdapter.upDateDataSort(SortOrder.ASCENDING)
+            }
+
+            /** 由大到小排序*/
+            btSortDescending.setOnClickListener {
+                mAdapter.upDateDataSort(SortOrder.DESCENDING)
             }
         }
     }

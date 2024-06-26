@@ -34,13 +34,30 @@
             android:layout_height="1dp"
             android:background="@color/cl808080" />
 
-        <Button
-            android:id="@+id/btSort"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="12dp"
-            android:text="排列整理" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btSortAscending"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="12dp"
+                android:layout_weight="1"
+                android:text="排列 - 由小到大" />
+
+            <Button
+                android:id="@+id/btSortDescending"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="12dp"
+                android:layout_weight="1"
+                android:text="排列 - 由大到小" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

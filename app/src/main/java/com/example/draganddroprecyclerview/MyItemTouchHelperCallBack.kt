@@ -4,15 +4,10 @@ import android.graphics.Canvas
 import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 interface MyItemTouchHelperAdapter {
     fun onItemMove(fromPosition: Int, toPosition: Int)
     fun isItemDisabled(position: Int): Boolean
-
-    fun getItemCount(): Int
 }
 
 class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) :
@@ -94,10 +89,6 @@ class MyItemTouchHelperCallBack(private val mAdapter: MyItemTouchHelperAdapter) 
         viewHolder.itemView.alpha = 1.0f // 確保透明度恢復
         if (viewHolder is MyAdapter.MyItemViewHolder) {
             viewHolder.onItemDrop()
-            val startPosition = viewHolder.adapterPosition
-            CoroutineScope(Dispatchers.Main).launch {
-                viewHolder.onItemChangeUpdateUI(startPosition)
-            }
         }
     }
 }

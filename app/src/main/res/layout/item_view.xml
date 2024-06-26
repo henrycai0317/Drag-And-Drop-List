@@ -52,19 +52,14 @@
             app:layout_constraintRight_toLeftOf="@+id/llDataContent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/tvTag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="25dp"
-                android:layout_marginRight="25dp"
-                android:background="@drawable/bg_circle_blue"
-                android:paddingHorizontal="5dp"
-                android:paddingVertical="4dp"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                tools:text="1"
-                tools:visibility="visible" />
+            <ImageView
+                android:id="@+id/tvStartDelivery"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/fast_delivery"
+                android:textColor="@color/white" />
 
             <ImageView
                 android:id="@+id/ivDelayed"

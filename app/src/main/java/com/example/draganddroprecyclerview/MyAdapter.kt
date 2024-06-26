@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.draganddroprecyclerview.databinding.ItemViewBinding
 import kotlinx.coroutines.CoroutineScope
@@ -19,8 +21,14 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.math.abs
 
-class MyAdapter(private val mDataList: MutableList<DataModel>) :
+class MyAdapter(
+    private val mDataList: MutableList<DataModel>,
+    private val mRecyclerView: RecyclerView?
+) :
     RecyclerView.Adapter<MyAdapter.MyItemViewHolder>(), MyItemTouchHelperAdapter {
+    private val mLayoutManager: LinearLayoutManager =
+        mRecyclerView?.layoutManager as LinearLayoutManager
+
     private val TAG get() = MyAdapter::class.java.simpleName
 
     private var itemTouchHelper: ItemTouchHelper? = null
@@ -33,9 +41,33 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
         this.itemTouchHelper = itemTouchHelper
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun upDateData() {
-        notifyDataSetChanged()
+    fun upDateDataSort(mCurrentSortType: SortOrder) {
+        val iNewDataList = mutableListOf<DataModel>()
+        val iDisableList = mDataList.filter { it.isDisable }
+        val iNormalSortedList = sortList(mDataList.filter { !it.isDisable }, mCurrentSortType)
+        iNewDataList.addAll(iNormalSortedList)
+        iNewDataList.addAll(iDisableList)
+        notifyAdapterDataChange(iNewDataList)
+    }
+
+    /** DiffUtil 更新List Data*/
+    private fun notifyAdapterDataChange(pNewDataList: List<DataModel>) {
+        val firstVisibleItemPosition = mLayoutManager.findFirstVisibleItemPosition()
+        val diffResult = DiffUtil.calculateDiff(DataModelDiffCallback(mDataList, pNewDataList))
+        mDataList.clear()
+        mDataList.addAll(pNewDataList)
+        diffResult.dispatchUpdatesTo(this)
+
+        /** 確保RecyclerView顯示位置是排序前的顯示位置*/
+        mRecyclerView?.scrollToPosition(firstVisibleItemPosition)
+        mLayoutManager.scrollToPositionWithOffset(firstVisibleItemPosition, 0)
+    }
+
+    private fun sortList(sortList: List<DataModel>, order: SortOrder): List<DataModel> {
+        return when (order) {
+            SortOrder.ASCENDING -> sortList.sortedBy { it.orderId }
+            SortOrder.DESCENDING -> sortList.sortedByDescending { it.orderId }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyItemViewHolder {
@@ -44,7 +76,7 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
     }
 
     override fun onBindViewHolder(holder: MyItemViewHolder, position: Int) {
-        holder.bindData(mDataList[position], position)
+        holder.bindData(mDataList[position])
     }
 
     override fun getItemCount(): Int {
@@ -77,7 +109,6 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
     inner class MyItemViewHolder(private val mBinding: ItemViewBinding) :
         RecyclerView.ViewHolder(mBinding.root), View.OnTouchListener {
 
-        private val viewHolderScope = CoroutineScope(Dispatchers.Main + Job())
         private var gestureDetector: GestureDetector? = null
 
         init {
@@ -87,38 +118,34 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
             mBinding.llDelayed.setOnClickListener {
                 val currentPosition = adapterPosition
                 if (currentPosition != RecyclerView.NO_POSITION && currentPosition != itemCount - 1) {
-                    val item = mDataList.removeAt(currentPosition)
+                    val newList = mDataList.toMutableList()
+                    val item = newList.removeAt(currentPosition)
                     item.isDisable = true
                     item.translationX = 0f
-                    mDataList.add(item)
-                    notifyDataSetChanged()
+                    newList.add(item)
+                    notifyAdapterDataChange(newList)
+                    notifyItemChanged(currentPosition)  // 通知項目已更改以重新綁定視圖
+                    notifyItemChanged(itemCount - 1)    // 通知最後一個項目以更新其狀態
                 }
             }
         }
 
 
-        fun bindData(pDataModel: DataModel, pPosition: Int) {
-            viewHolderScope.coroutineContext.cancelChildren() // 取消之前的協程
-            viewHolderScope.launch {
-                val tagNum = withContext(Dispatchers.Default) {
-                    countEnabledItems(pPosition)
-                }
-                Log.d(TAG, "bindData: tagNum = $tagNum")
-                updateUI(pDataModel, tagNum)
-            }
+        fun bindData(pDataModel: DataModel) {
+            updateUI(pDataModel)
             /**  根據滑動狀態設置 初始化 translationX  */
             mBinding.clMainContent.translationX = pDataModel.translationX
         }
 
         @SuppressLint("ClickableViewAccessibility")
-        private fun updateUI(pDataModel: DataModel, tagNum: Int) {
+        private fun updateUI(pDataModel: DataModel) {
             mBinding.apply {
-                updateUIDelayedState(pDataModel, tagNum)
+                updateUIDelayedState(pDataModel)
                 tvOrderId.text = pDataModel.orderId
                 tvAddress.text = pDataModel.address
                 Log.d(
                     TAG,
-                    "updateUI: tvTag = ${tvTag.text}, tvOrderId = ${tvOrderId.text}, tvAddress = ${tvAddress.text}"
+                    "updateUI: tvOrderId = ${tvOrderId.text}, tvAddress = ${tvAddress.text}"
                 )
                 llDragHandle.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
@@ -130,31 +157,16 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
         }
 
         /** 更新Disable UI */
-        private fun ItemViewBinding.updateUIDelayedState(
-            pDataModel: DataModel,
-            tagNum: Int
-        ) {
+        private fun ItemViewBinding.updateUIDelayedState(pDataModel: DataModel) {
             if (pDataModel.isDisable) {
-                tvTag.setViewGone()
+                tvStartDelivery.setViewGone()
                 ivDelayed.setViewVisible()
                 clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card_disable)
             } else {
                 ivDelayed.setViewGone()
-                tvTag.setViewVisible()
+                tvStartDelivery.setViewVisible()
                 clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
-                tvTag.text = (tagNum).toString()
             }
-        }
-
-        private fun countEnabledItems(pPosition: Int): Int {
-            var tagNum = 0
-            for (index in 0..pPosition) {
-                Log.d(TAG, "countEnabledItems: index: $index")
-                if (!mDataList[index].isDisable) {
-                    tagNum++
-                }
-            }
-            return tagNum
         }
 
         /** 長按顏色 */
@@ -165,35 +177,6 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
         /** 放入後變回原始顏色 */
         fun onItemDrop() {
             mBinding.clMainContent.setBackgroundResource(R.drawable.bg_radius_8_solid_card)
-        }
-
-        suspend fun onItemChangeUpdateUI(pFromPosition: Int) {
-            mIsDrop = true
-            Log.d(
-                TAG,
-                "onItemChangeTag: mOriginPosition $mOriginPosition startPosition $pFromPosition "
-            )
-            if (mOriginPosition != -1) {
-                withContext(Dispatchers.Default) {
-                    val range = if (mOriginPosition < pFromPosition) {
-                        mOriginPosition..pFromPosition
-                    } else {
-                        pFromPosition..mOriginPosition
-                    }
-
-                    val itemsToUpdate = mutableListOf<Int>()
-                    for (i in range) {
-                        Log.d(TAG, "onItemChangeTag: Add $i to update list")
-                        itemsToUpdate.add(i)
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        itemsToUpdate.forEach {
-                            notifyItemChanged(it, "TAG_UPDATE")
-                        }
-                    }
-                }
-            }
         }
 
         inner class MyGestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -282,8 +265,5 @@ class MyAdapter(private val mDataList: MutableList<DataModel>) :
                 mLastSwipedPosition = pCurrentPosition
             }
         }
-
-
     }
-
 }
