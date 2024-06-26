@@ -137,12 +137,12 @@ class MyAdapter(
             mBinding.clMainContent.translationX = pDataModel.translationX
         }
 
-        @SuppressLint("ClickableViewAccessibility")
+        @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
         private fun updateUI(pDataModel: DataModel) {
             mBinding.apply {
                 updateUIDelayedState(pDataModel)
                 tvOrderId.text = pDataModel.orderId
-                tvAddress.text = pDataModel.address
+                tvAddress.text = "Address : ${pDataModel.address}"
                 Log.d(
                     TAG,
                     "updateUI: tvOrderId = ${tvOrderId.text}, tvAddress = ${tvAddress.text}"
